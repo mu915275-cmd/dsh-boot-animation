@@ -1,0 +1,11 @@
+# Keep every text file LF both in the repository and in the working tree.
+# The repo ships shell scripts (scripts/build.sh) and the committed build output
+# (lib/*.js), so a CRLF working tree would break the scripts on Linux/macOS and
+# turn every contributor's first diff into whole-file rewrites.
+* text=auto eol=lf
+
+# Binary assets: never touch these.
+*.mp4 binary
+*.png binary
+*.jpg binary
+*.woff2 binary

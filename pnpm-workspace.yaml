@@ -1,0 +1,13 @@
+# Build-only. NOT published (package.json `files` whitelists lib/, READMEs,
+# LICENSE and cordis.patch.yml).
+#
+# nodeLinker: hoisted — the DSH file sandbox cannot resolve Windows junctions
+# (`fs.realpathSync` returns the junction path itself), so pnpm's default
+# isolated virtual store, whose package dependencies are junctions, makes Node's
+# ESM loader fail with "Cannot find package 'ansis'" inside tsdown. A flat
+# node_modules of real directories has no junction to resolve.
+#
+# Rebuild with: pnpm install && pnpm run build:client
+packages:
+  - .
+nodeLinker: hoisted
