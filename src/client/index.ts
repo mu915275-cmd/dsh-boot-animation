@@ -398,26 +398,81 @@ html.dba-skin-on.dba-text-side-on [class*="_sidebarCol"]{
 html.dba-skin-on.dba-text-ws-scrim [class*="_centerCol"],
 html.dba-skin-on.dba-text-ws-scrim.dba-skin-window [class*="_rightbarCol"]{
   --dsw-specific-input-major:var(--dba-ws-card)!important;
+  --dsw-specific-input-minor:var(--dba-ws-card)!important;
   --dsw-specific-bubble:var(--dba-ws-card)!important;
-  --dsw-alias-settings-card-fill:var(--dba-ws-card)!important;
-  --dsw-alias-button-floating-fill:var(--dba-ws-card)!important;
   --dsw-specific-menu:var(--dba-ws-card)!important;
   --dsw-menu-surface-fill:var(--dba-ws-card)!important;
+  --dsw-alias-settings-card-fill:var(--dba-ws-card)!important;
+  --dsw-alias-button-floating-fill:var(--dba-ws-card)!important;
+  --dsw-alias-markdown-inline-code:var(--dba-ws-card)!important;
+  --dsw-alias-markdown-code-block:var(--dba-ws-card)!important;
+  --dsw-alias-markdown-code-block-banner:var(--dba-ws-card)!important;
+  --dsw-alias-markdown-citation:var(--dba-ws-card)!important;
+  --deliverable-fill:var(--dba-ws-card)!important;
   --dsw-specific-selector:var(--dba-ws-soft)!important;
   --dsw-alias-button-elevated-fill:var(--dba-ws-soft)!important;
   --dsw-alias-bg-layer-1:var(--dba-ws-soft)!important;
-  --dsw-alias-bg-layer-3:var(--dba-ws-soft)!important}
+  --dsw-alias-bg-layer-2:var(--dba-ws-soft)!important;
+  --dsw-alias-bg-layer-3:var(--dba-ws-soft)!important;
+  --dsw-alias-interactive-bg-hover-solid:var(--dba-ws-soft)!important;
+  --dsw-alias-markdown-tag:var(--dba-ws-soft)!important;
+  --dsw-alias-markdown-placeholder:var(--dba-ws-soft)!important;
+  --dsw-alias-markdown-code-segment-selected:var(--dba-ws-soft)!important;
+  --dsw-alias-markdown-code-segment-unselected:var(--dba-ws-soft)!important}
 html.dba-skin-on.dba-text-side-scrim [class*="_sidebarCol"]{
   --dsw-specific-input-major:var(--dba-side-card)!important;
+  --dsw-specific-input-minor:var(--dba-side-card)!important;
   --dsw-specific-bubble:var(--dba-side-card)!important;
-  --dsw-alias-settings-card-fill:var(--dba-side-card)!important;
-  --dsw-alias-button-floating-fill:var(--dba-side-card)!important;
   --dsw-specific-menu:var(--dba-side-card)!important;
   --dsw-menu-surface-fill:var(--dba-side-card)!important;
+  --dsw-alias-settings-card-fill:var(--dba-side-card)!important;
+  --dsw-alias-button-floating-fill:var(--dba-side-card)!important;
+  --dsw-alias-markdown-inline-code:var(--dba-side-card)!important;
+  --dsw-alias-markdown-code-block:var(--dba-side-card)!important;
+  --dsw-alias-markdown-code-block-banner:var(--dba-side-card)!important;
+  --dsw-alias-markdown-citation:var(--dba-side-card)!important;
+  --deliverable-fill:var(--dba-side-card)!important;
   --dsw-specific-selector:var(--dba-side-soft)!important;
   --dsw-alias-button-elevated-fill:var(--dba-side-soft)!important;
   --dsw-alias-bg-layer-1:var(--dba-side-soft)!important;
-  --dsw-alias-bg-layer-3:var(--dba-side-soft)!important}
+  --dsw-alias-bg-layer-2:var(--dba-side-soft)!important;
+  --dsw-alias-bg-layer-3:var(--dba-side-soft)!important;
+  --dsw-alias-interactive-bg-hover-solid:var(--dba-side-soft)!important;
+  --dsw-alias-markdown-tag:var(--dba-side-soft)!important;
+  --dsw-alias-markdown-placeholder:var(--dba-side-soft)!important;
+  --dsw-alias-markdown-code-segment-selected:var(--dba-side-soft)!important;
+  --dsw-alias-markdown-code-segment-unselected:var(--dba-side-soft)!important}
+/* Text that sits on the PICTURE itself cannot be made legible by any colour alone:
+   a bright clip defeats light text and a dark one defeats dark text. A halo of the
+   opposite polarity does make it legible, and unlike a scrim over the whole column
+   it leaves the picture visible. It is inherited, so one declaration covers every
+   run of text in the area; on a card the shadow simply disappears into the fill. */
+html.dba-skin-on.dba-text-ws-on [class*="_centerCol"],
+html.dba-skin-on.dba-text-ws-on.dba-skin-window [class*="_rightbarCol"]{
+  text-shadow:0 1px 2px var(--dba-ws-halo),0 0 5px var(--dba-ws-halo)}
+html.dba-skin-on.dba-text-side-on [class*="_sidebarCol"]{
+  text-shadow:0 1px 2px var(--dba-side-halo),0 0 5px var(--dba-side-halo)}
+/* Two surfaces cannot be reached through a token at all, so they are named.
+   The file/deliverable card paints its fill from a palette-scoped HARDCODED colour
+   (setting all 433 custom properties on it, and on its four ancestors, moves nothing,
+   yet it is #fafafa in the light palette and #212123 in the dark one), so no variable
+   can flip it. The transcript separator is worse: it paints its LINE from
+   --dsw-alias-label-caption, i.e. from a text colour, so repainting the text turned the
+   line white. Both are matched by the END of the class name (the hash prefix changes
+   between builds; an exact suffix is safe in a way a substring is not). */
+html.dba-skin-on.dba-text-ws-scrim [class*="_centerCol"] [class$="_file"],
+html.dba-skin-on.dba-text-ws-scrim [class*="_centerCol"] [class$="_deliverable"],
+html.dba-skin-on.dba-text-ws-scrim.dba-skin-window [class*="_rightbarCol"] [class$="_file"],
+html.dba-skin-on.dba-text-ws-scrim.dba-skin-window [class*="_rightbarCol"] [class$="_deliverable"]{
+  background-color:var(--dba-ws-card)!important}
+html.dba-skin-on.dba-text-ws-scrim [class*="_sidebarCol"] [class$="_file"],
+html.dba-skin-on.dba-text-ws-scrim [class*="_sidebarCol"] [class$="_deliverable"]{
+  background-color:var(--dba-side-card)!important}
+html.dba-skin-on.dba-text-ws-on [class*="_centerCol"] [class$="_separator"],
+html.dba-skin-on.dba-text-ws-on.dba-skin-window [class*="_rightbarCol"] [class$="_separator"]{
+  background-color:var(--dba-ws-halo)!important}
+html.dba-skin-on.dba-text-side-on [class*="_sidebarCol"] [class$="_separator"]{
+  background-color:var(--dba-side-halo)!important}
 /* The sidebar column's own fill is a colour-mix of a neutral, so it needs the same
    flip: a light palette with light text has to mix from the DARK neutral. */
 html.dba-skin-on.dba-skin-window.dba-text-side-scrim body{--dsw-specific-sidebar-fill:color-mix(in srgb,var(--dsw-static-neutral-bluish-900) var(--dba-skin-sidebar,65%),transparent)!important}
@@ -1406,6 +1461,15 @@ function isLightColor(hex: string): boolean {
 const SCRIM_FOR_LIGHT_TEXT = { card: 'rgba(30,31,34,0.88)', soft: 'rgba(56,58,62,0.86)' }
 const SCRIM_FOR_DARK_TEXT = { card: 'rgba(255,255,255,0.90)', soft: 'rgba(238,240,244,0.88)' }
 
+/**
+ * The halo behind text that sits on the picture, chosen opposite to the text so it
+ * always adds contrast rather than removing it. `text-shadow` inherits, which is
+ * what lets one declaration cover every run of text in an area.
+ */
+function haloFor(hex: string): string {
+  return isLightColor(hex) ? 'rgba(0,0,0,0.72)' : 'rgba(255,255,255,0.92)'
+}
+
 type StoredFrame = { id?: unknown; version?: unknown; name?: unknown; back?: unknown; dataUrl?: unknown }
 type StoredFrameRead = { image: string; key: string; source: string; back: number; url: string }
 
@@ -1767,10 +1831,14 @@ function paintSkin(): void {
       root.style.removeProperty('--dba-text-' + area)
       root.style.removeProperty('--dba-' + scrimBase + '-card')
       root.style.removeProperty('--dba-' + scrimBase + '-soft')
+      root.style.removeProperty('--dba-' + scrimBase + '-halo')
       root.classList.remove('dba-text-' + area + '-scrim')
       return
     }
     root.style.setProperty('--dba-text-' + area, value)
+    // The halo is unconditional (any chosen colour may end up on the picture) and
+    // opposite in polarity, so it always raises contrast.
+    root.style.setProperty('--dba-' + scrimBase + '-halo', haloFor(value))
     // The palette already pairs light text with dark surfaces (and the reverse), so
     // a colour that agrees with it needs no surface work at all -- only a colour
     // that fights the palette does, and then the neutral surfaces follow it.

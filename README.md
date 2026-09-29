@@ -149,11 +149,25 @@ DSH 的客户端 bundle 响应带 `cache-control: max-age=31536000, immutable`�
 **中性底色**一起翻过来：选浅色字 → 卡片 / 气泡（对话里的文件名就在这）/ 输入框 / 侧边栏按钮变深；
 选深色字 → 它们变浅。字色与主题**同向**时（暗色主题 + 浅色字）**什么都不动**，所以默认观感与旧版完全一致。
 
-被翻转的是这些**中性** token：`--dsw-specific-input-major`（输入框卡片）、`--dsw-specific-bubble`
-（消息气泡，文件名就在这里）、`--dsw-specific-selector`、`--dsw-alias-button-elevated-fill`
-（侧边栏「新会话」）、`--dsw-alias-settings-card-fill`、`--dsw-alias-button-floating-fill`、
-`--dsw-specific-menu` / `--dsw-menu-surface-fill`、`--dsw-alias-bg-layer-1/3`；
-窗口范围下侧边栏那层底色也跟着换成对应明暗的中性色。
+被翻转的是这些**中性** token（括号里是实测它画在哪）：
+
+| 一族 | 画在哪 |
+|---|---|
+| `--dsw-specific-input-major` / `-minor` | 输入框卡片 |
+| `--dsw-specific-bubble` | 消息气泡（对话里的文件名就在这） |
+| `--dsw-specific-selector` | chip、加号按钮 |
+| `--dsw-alias-button-elevated-fill` | 侧边栏「新会话」 |
+| `--dsw-alias-markdown-inline-code` | **行内代码小框**（消息里那一个个 `代码`） |
+| `--dsw-alias-markdown-code-block` / `-banner` | 代码块与它的标题条 |
+| `--dsw-alias-markdown-tag` / `-placeholder` / `-citation` / `-code-segment-*` | 其它 markdown 底 |
+| `--dsw-alias-settings-card-fill`、`-button-floating-fill`、`-bg-layer-1/2/3`、`-interactive-bg-hover-solid` | 各种卡片 / 浮层 / 悬停态 |
+| `--dsw-specific-menu` / `--dsw-menu-surface-fill` | 菜单 |
+| `--deliverable-fill` + `[class$="_file"]`、`[class$="_deliverable"]` | **文件卡片**（见下） |
+
+> **文件卡片是个特例**：它的底色是**按主题写死**的（在它和它四层祖先上把 433 个自定义属性逐个设成标记色，**没有一个能让它动**，
+> 可它确实是亮主题 `#fafafa`、暗主题 `#212123`），没有 token 可挂，所以只能按类名**结尾**匹配
+> （`[class$="_file"]`，hash 前缀会随构建变，结尾不会）。同理，对话里的**分隔线**是拿
+> `--dsw-alias-label-caption`（一个**文字**色）当线色画的，我改文字时会把它一起改成白色，所以单独把它压回光晕色。
 
 三种东西**故意不碰** —— 它们是成对的语义色，改了反而坏掉：
 
@@ -162,6 +176,12 @@ DSH 的客户端 bundle 响应带 `cache-control: max-age=31536000, immutable`�
 | `label-primary-inverted` / `label-primary-foreground` | "浅色块上的字""彩色按钮上的字"：改了就变成按钮标签消失 |
 | `label-primary-bluish` | "蓝底胶囊上的字"，比如标题旁那个「预览版」：它的淡蓝底属于信息色，不跟着翻 |
 | 彩色填充本身（品牌色 / 信息色按钮，例如发送键） | 它们的标签用的是上面那两个 token |
+
+### 直接压在画面上的文字：加一层反色光晕
+
+会话里**大部分文字其实没有卡片**（消息正文、路径、时间、标签都直接躺在画面上）。这类文字靠换颜色
+**永远**解决不了：亮画面吃浅字、暗画面吃深字。所以设了字色之后，该区域的文字会带一层
+**与字色相反的光晕**（浅字配深光晕、深字配浅光晕，`text-shadow`），既不挡画面又保证读得出。
 
 **唯一还需要你自己权衡的**是**直接压在画面上的文字**（最明显的是会话标题「探索未至之境」）——
 它底下没有卡片，只有你的片子。这类文字读不读得出取决于你的片子：亮底配深字、暗底配浅字，

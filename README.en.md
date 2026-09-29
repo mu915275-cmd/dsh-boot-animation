@@ -149,16 +149,41 @@ card, the chips and the sidebar's new-session button dark; dark text makes them
 light. When your colour AGREES with the palette nothing moves at all, so a choice
 that matches the theme changes nothing.
 
-Flipped: `--dsw-specific-input-major`, `--dsw-specific-bubble`,
-`--dsw-specific-selector`, `--dsw-alias-button-elevated-fill`,
-`--dsw-alias-settings-card-fill`, `--dsw-alias-button-floating-fill`,
-`--dsw-specific-menu` / `--dsw-menu-surface-fill`, `--dsw-alias-bg-layer-1/3`, plus
-the sidebar column's own fill in window scope.
+Flipped (with what each one paints, as measured):
 
-The one thing still yours to weigh is text **straight onto the picture** (the
-conversation title is the obvious one): there is no card under it, only your clip,
-so its readability depends on that clip -- a dark picture wants light text and the
-reverse -- or dilute the picture with the transparency slider.
+| Family | Paints |
+|---|---|
+| `--dsw-specific-input-major` / `-minor` | the composer card |
+| `--dsw-specific-bubble` | message bubbles (where the file names are) |
+| `--dsw-specific-selector` | chips and the add button |
+| `--dsw-alias-button-elevated-fill` | the sidebar's new-session button |
+| `--dsw-alias-markdown-inline-code` | the inline-code box |
+| `--dsw-alias-markdown-code-block` / `-banner` | code blocks and their banner |
+| `--dsw-alias-markdown-tag` / `-placeholder` / `-citation` / `-code-segment-*` | other markdown surfaces |
+| `--dsw-alias-settings-card-fill`, `-button-floating-fill`, `-bg-layer-1/2/3`, `-interactive-bg-hover-solid` | cards, floating layers, hover |
+| `--dsw-specific-menu` / `--dsw-menu-surface-fill` | menus |
+| `--deliverable-fill` + `[class$="_file"]`, `[class$="_deliverable"]` | the file card (see below) |
+
+> **The file card is a special case**: its fill is a palette-scoped HARDCODED colour.
+> Setting all 433 custom properties on it, and on its four ancestors, moves nothing --
+> yet it is `#fafafa` in the light palette and `#212123` in the dark one -- so no token
+> can hook it and it is matched by the END of its class name instead (`[class$="_file"]`;
+> the hash prefix changes between builds, the suffix does not). The transcript
+> separator has the opposite quirk: it paints its line from `--dsw-alias-label-caption`,
+> a TEXT colour, so repainting the text turned the line white; it is pinned back to the
+> halo colour.
+
+### Text straight onto the picture gets a halo
+
+Most text in a transcript has **no card under it** (message bodies, paths, timestamps,
+chips all sit on the picture). No colour can win there: a bright clip defeats light text
+and a dark one defeats dark text. So once a colour is chosen, the area's text carries a
+halo of the **opposite** polarity (light text gets a dark halo and the reverse, via
+`text-shadow`), which leaves the picture visible and still guarantees legibility.
+
+The one thing still yours to weigh is the title itself: with the halo it reads over most
+clips, but a colour that matches your clip (plus the transparency slider) is what makes
+it comfortable.
 
 ```sh
 mkdir -p ~/.dsh/boot-animation/videos
