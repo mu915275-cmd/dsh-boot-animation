@@ -46,17 +46,42 @@ git push -u origin main
 
 ## 三、四道自动闸门
 
-脚本在列表仓库里：`scripts/check-submission.mjs`。它只查这四件事：
+校验脚本在列表仓库里：`scripts/check-submission.mjs`。它只查这四件事：
 
 | # | 要求 | 本仓库状态 |
 |---|---|---|
 | 1 | 仓库内**任意** `package.json` 声明 `dsh.bundle` | ✅ `{"patch":"./cordis.patch.yml"}` |
-| 2 | 仓库创建**满 24 小时** | ⏳ 新仓库会先红一下，**会自己重跑变绿**，不需要重新提交/推送/关掉重开 |
+| 2 | 仓库创建满 **1 天**（`MIN_AGE_DAYS = 1`） | ⏳ 实测会先红（见下），**时间到了自己变绿** |
 | 3 | 存在、公开、未归档、**非 fork** | ⚠️ 见上一节：必须新建仓库，不能是 fork |
 | 4 | 不是 DSH 本体 | ✅ |
 
 闸门 1 的报错文案是 `declares only \`dsh.client\` — that alone is not installable` ——
 **只声明 `dsh.client` 的插件会被直接拒掉**，这是最常见的被拒原因。
+
+### ⚠️ 别把「PR check 绿了」当成「闸门过了」
+
+这是两个不同的 workflow，很容易看错（我自己就先把测试套件当成了整套检查）：
+
+| Workflow | 干什么 | 在 PR 上显示为 |
+|---|---|---|
+| `pr-check.yml`（`PR check`） | 仓库自带测试：README 与 `data/plugins` 一致、awesome-lint、回归测试、构建 | check-run **`check`** |
+| `pr-gate.yml`（`Submission gate`） | 真正跑 `scripts/check-submission.mjs`：`dsh.bundle`、**年龄**、commit 数、非 fork | check-run **`Submission gate`** |
+
+`Submission gate` 是 `workflow_run` 触发的（等 `PR check` 跑完才启动），所以它会**晚几分钟**才出现 ——
+只看第一次查询很容易只看到 `check` 绿。
+
+### 年龄闸门长什么样（实测原文）
+
+```
+**https://github.com/mu915275-cmd/dsh-boot-animation** - repository is 0.1 days old (needs 1)
+— nothing to do: this check re-runs by itself and should clear in about 23h.
+No need to resubmit, push, or close and reopen; the age bar is the only thing failing here.
+```
+
+- 该闸门只对 **PR 创建时间晚于 `GATE_EFFECTIVE_FROM`（2026-08-16）** 的 PR 生效；
+- 仓库已在列表中（改描述、改分类）会跳过年龄栏，**新增条目不会**；
+- 红着不用做任何事：`regate.yml` 每 6 小时重跑一次，仓库满 1 天后它自己变绿。
+  **不要**重推、不要关掉重开（重开反而会按新规则重算）。
 
 ---
 
