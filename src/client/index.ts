@@ -248,7 +248,7 @@ const CSS = `
   font-size:13px;line-height:1.55}
 .dba-lib h3{margin:0 0 4px;font-size:15px;font-weight:600}
 .dba-lib p{margin:0 0 6px;color:var(--dsw-alias-text-secondary,var(--dsw-alias-label-secondary,#777));font-size:12.5px}
-.dba-item{display:flex;align-items:center;gap:10px;padding:4px 10px;border-radius:9px;
+.dba-item{display:flex;align-items:center;gap:10px;padding:3px 10px;border-radius:9px;
   cursor:pointer;border:1px solid transparent}
 .dba-item:hover{background:rgba(127,127,127,.12)}
 .dba-item.dba-cur{border-color:rgba(7,193,96,.55);background:rgba(7,193,96,.10)}
@@ -280,7 +280,7 @@ const CSS = `
 /* Two role sections in one list. The rows are the same rows as before; only the
    heading tells them apart, and the heading is where the "which one am I
    picking" question gets answered. */
-.dba-sec-head{display:flex;align-items:baseline;gap:8px;margin:7px 0 2px;
+.dba-sec-head{display:flex;align-items:baseline;gap:8px;margin:6px 0 2px;
   padding-bottom:4px;border-bottom:.5px solid var(--dsw-alias-border-l4,rgba(127,127,127,.28))}
 .dba-sec-name{font-size:13px;font-weight:600;
   color:var(--dsw-alias-text-primary,var(--dsw-alias-label-primary,#191919))}
@@ -349,6 +349,38 @@ html.dba-skin-on body{--dsw-alias-bg-base:transparent!important}
    independently -- and 0% skin plus an opaque sidebar was not expressible. */
 html.dba-skin-on.dba-skin-window body{--dsw-specific-sidebar-fill:color-mix(in srgb,var(--dsw-static-neutral-bluish-50) var(--dba-skin-sidebar,65%),transparent)!important}
 html.dba-skin-on.dba-skin-window body[data-ds-dark-theme]{--dsw-specific-sidebar-fill:color-mix(in srgb,var(--dsw-static-neutral-bluish-900) var(--dba-skin-sidebar,65%),transparent)!important}
+/* Text over the picture, one block per area.
+   The theme names these --dsw-alias-label-* (there is no --dsw-alias-text-*; the
+   picker's own CSS falls back to the label names for that reason), and body text
+   is spread over six of them, so a single override would leave half the words
+   unreadable. Only the CONTENT family is overridden: label-primary-inverted and
+   label-primary-foreground mean "text on a light chip" and "text on a coloured
+   button", and repainting those would erase button labels.
+   The two areas are found by the stable semantic suffix of their column class
+   (the hash prefix changes between builds, the suffix does not).
+   Both blocks are gated on the on-classes paintSkin toggles, because an unset
+   colour must not inject an invalid var() into the theme's own tokens. */
+html.dba-skin-on.dba-text-ws-on [class*="_centerCol"],
+html.dba-skin-on.dba-text-ws-on.dba-skin-window [class*="_rightbarCol"]{
+  --dsw-alias-label-primary:var(--dba-text-ws)!important;
+  --dsw-alias-label-primary-dimmed:var(--dba-text-ws)!important;
+  --dsw-alias-label-primary-bluish:var(--dba-text-ws)!important;
+  --dsw-alias-label-secondary:var(--dba-text-ws)!important;
+  --dsw-alias-label-tertiary:var(--dba-text-ws)!important;
+  --dsw-alias-label-caption:var(--dba-text-ws)!important}
+html.dba-skin-on.dba-text-side-on [class*="_sidebarCol"]{
+  --dsw-alias-label-primary:var(--dba-text-side)!important;
+  --dsw-alias-label-primary-dimmed:var(--dba-text-side)!important;
+  --dsw-alias-label-primary-bluish:var(--dba-text-side)!important;
+  --dsw-alias-label-secondary:var(--dba-text-side)!important;
+  --dsw-alias-label-tertiary:var(--dba-text-side)!important;
+  --dsw-alias-label-caption:var(--dba-text-side)!important;
+  --dsw-alias-menu-icon:var(--dba-text-side)!important;
+  --dsw-alias-brand-text:var(--dba-text-side)!important}
+.dba-color{display:inline-flex;align-items:center;gap:5px;font-size:12px;
+  color:var(--dsw-alias-text-secondary,var(--dsw-alias-label-secondary,#777));cursor:pointer}
+.dba-color input[type=color]{width:26px;height:20px;padding:0;border:1px solid rgba(127,127,127,.45);
+  border-radius:5px;background:transparent;cursor:pointer}
 .dba-range{flex:1;min-width:130px;max-width:230px;height:18px;margin:0;
   accent-color:#07c160;cursor:pointer}
 .dba-range:disabled{opacity:.42;cursor:default}
@@ -1043,6 +1075,47 @@ function VideoLibrary({ onClose, onPreview }: { onClose: () => void; onPreview: 
       ),
       h(
         'div',
+        { className: 'dba-fit' },
+        h('span', { title: '皮肤后面那层图上的文字颜色。透明度过低、或图本身偏暗时，主题自带的字会看不清。' }, '字体颜色：'),
+        h(
+          'label',
+          { className: 'dba-color', title: '工作区（对话区 + 右侧栏）的字色' },
+          '工作区',
+          h('input', {
+            type: 'color',
+            disabled: !skin.on,
+            value: skin.textWorkspace === '' ? currentTextColor('workspace') : skin.textWorkspace,
+            onChange: (event: { target: { value: string } }) => setSkinText('workspace', event.target.value),
+          }),
+        ),
+        h(
+          'label',
+          { className: 'dba-color', title: '侧边栏的字色（含图标与 logo 文字）' },
+          '侧边栏',
+          h('input', {
+            type: 'color',
+            disabled: !skin.on,
+            value: skin.textSidebar === '' ? currentTextColor('sidebar') : skin.textSidebar,
+            onChange: (event: { target: { value: string } }) => setSkinText('sidebar', event.target.value),
+          }),
+        ),
+        h(
+          'button',
+          {
+            type: 'button',
+            className: 'dba-btn',
+            disabled: !skin.on || (skin.textWorkspace === '' && skin.textSidebar === ''),
+            title: '两个区域都恢复主题自带的文字颜色',
+            onClick: () => {
+              setSkinText('workspace', '')
+              setSkinText('sidebar', '')
+            },
+          },
+          '默认',
+        ),
+      ),
+      h(
+        'div',
         { className: 'dba-msg ' + (skin.status === 'error' ? 'dba-err' : skin.status === 'ready' ? 'dba-ok' : '') },
         skin.detail,
       ),
@@ -1097,6 +1170,18 @@ const SKIN_STRENGTH_KEY = 'dsh-boot-animation:skin-strength'
 const SKIN_SIDEBAR_KEY = 'dsh-boot-animation:skin-sidebar'
 const SKIN_MOTION_KEY = 'dsh-boot-animation:skin-motion'
 const SKIN_SPAN_KEY = 'dsh-boot-animation:skin-span'
+/**
+ * Text colours, one per area, stored as `#rrggbb` (absent = the theme's own).
+ *
+ * The reason this exists: at 0% transparency the picture is at full strength, and
+ * a dark frame under the dark palette's near-black text is unreadable. "Make the
+ * text lighter" is not a property of one token though -- the theme spreads body
+ * text over six label tokens -- so this repaints the whole label family inside
+ * one area, and each area gets its own value because the sidebar and the canvas
+ * sit on top of the picture to different degrees.
+ */
+const SKIN_TEXT_WORKSPACE_KEY = 'dsh-boot-animation:skin-text-workspace'
+const SKIN_TEXT_SIDEBAR_KEY = 'dsh-boot-animation:skin-text-sidebar'
 /** Transparency percent: 0 shows the frame at full strength, 100 shows none of it. */
 const SKIN_STRENGTH_DEFAULT = 30
 /**
@@ -1177,6 +1262,9 @@ type SkinState = {
   motion: Motion
   /** Seconds of the clip's tail the live mode loops (0 = whole clip). */
   span: Span
+  /** Text colour over the picture, workspace / sidebar. '' = the theme's own. */
+  textWorkspace: string
+  textSidebar: string
   status: 'idle' | 'working' | 'ready' | 'error'
   detail: string
   /** The name of the clip the painted frame came from. */
@@ -1244,6 +1332,12 @@ function readSpan(): Span {
   const raw = Number(stored)
   if (!Number.isFinite(raw) || raw < 0) return SKIN_SPAN_DEFAULT
   return Math.round(raw)
+}
+
+/** A stored `#rrggbb`, or '' for "use the theme's own text colours". */
+function readTextColor(key: string): string {
+  const raw = readFlag(key)
+  return typeof raw === 'string' && /^#[0-9a-fA-F]{6}$/.test(raw.trim()) ? raw.trim().toLowerCase() : ''
 }
 
 type StoredFrame = { id?: unknown; version?: unknown; name?: unknown; back?: unknown; dataUrl?: unknown }
@@ -1324,6 +1418,8 @@ let skinState: SkinState = {
   sidebar: readSidebar(),
   motion: readMotion(),
   span: readSpan(),
+  textWorkspace: readTextColor(SKIN_TEXT_WORKSPACE_KEY),
+  textSidebar: readTextColor(SKIN_TEXT_SIDEBAR_KEY),
   status: 'idle',
   detail: '',
   source: storedStart.source,
@@ -1595,6 +1691,16 @@ function paintSkin(): void {
   root.classList.toggle('dba-skin-on', active)
   root.classList.toggle('dba-skin-window', active && skinState.scope === 'window')
   root.classList.toggle('dba-skin-live-on', active && skinState.motion === 'live')
+  // Text colours. The gate class and the variable are set together: the CSS block
+  // only exists while the class is on, so an unset colour leaves the theme's own
+  // tokens completely alone instead of feeding them an undefined var().
+  const textColour = (cls: string, prop: string, value: string): void => {
+    root.classList.toggle(cls, active && value !== '')
+    if (value === '') root.style.removeProperty(prop)
+    else root.style.setProperty(prop, value)
+  }
+  textColour('dba-text-ws-on', '--dba-text-ws', skinState.textWorkspace)
+  textColour('dba-text-side-on', '--dba-text-side', skinState.textSidebar)
   // Unitless 0..1: read by the frame's opacity. The sidebar reads its own
   // variable below, so the two sliders stay independent.
   root.style.setProperty('--dba-skin-strength', String((100 - skinState.strength) / 100))
@@ -1896,6 +2002,51 @@ function setSkinSidebar(percent: number): void {
       : skinState.detail,
   })
   paintSkin()
+}
+
+/**
+ * Choose the text colour that sits on the picture for one area.
+ *
+ * `''` clears it back to the theme's own colours. The two areas are stored and
+ * applied separately because they are two different questions: the sidebar keeps
+ * a fill of its own while the canvas may be at full picture strength.
+ */
+function setSkinText(role: 'workspace' | 'sidebar', color: string): void {
+  const key = role === 'workspace' ? SKIN_TEXT_WORKSPACE_KEY : SKIN_TEXT_SIDEBAR_KEY
+  const value = /^#[0-9a-fA-F]{6}$/.test(color) ? color.toLowerCase() : ''
+  try {
+    if (value === '') window.localStorage.removeItem(key)
+    else window.localStorage.setItem(key, value)
+  } catch {
+    /* private mode: the choice simply does not persist */
+  }
+  const patch: Partial<SkinState> = role === 'workspace' ? { textWorkspace: value } : { textSidebar: value }
+  if (skinState.on) {
+    const area = role === 'workspace' ? '工作区' : '侧边栏'
+    patch.detail = value === '' ? '字体颜色：' + area + ' 恢复主题自带' : '字体颜色：' + area + ' ' + value.toUpperCase()
+  }
+  setSkinState(patch)
+  paintSkin()
+}
+
+/**
+ * What the colour picker should show before anything is chosen: the colour the
+ * area's own text has right now, so the first click starts from the truth rather
+ * than from a guess about which palette is on.
+ */
+function currentTextColor(role: 'workspace' | 'sidebar'): string {
+  const sel = role === 'sidebar' ? '[class*="_sidebarCol"]' : '[class*="_centerCol"]'
+  const el = document.querySelector(sel)
+  const hex = (value: string): string => {
+    const m = /^rgba?\((\d+),\s*(\d+),\s*(\d+)/.exec(value.trim())
+    if (m === null) return ''
+    return '#' + [m[1], m[2], m[3]].map((n) => Number(n).toString(16).padStart(2, '0')).join('')
+  }
+  const fromDom = el === null ? '' : hex(window.getComputedStyle(el).color)
+  if (fromDom !== '') return fromDom
+  // No DOM yet (or an unusual palette): fall back to the palette's own default.
+  const dark = document.body !== null && document.body.hasAttribute('data-ds-dark-theme')
+  return dark ? '#f9fafb' : '#191919'
 }
 
 /**

@@ -106,6 +106,41 @@ Steps 2-5 are what a role you never picked falls back to, so a profile that neve
 opens the picker behaves exactly as it did before the two sections existed -- and a
 historical `{"id": "..."}` selection file still drives both roles at once.
 
+## Text colour over the picture (workspace and sidebar, separately)
+
+At a low transparency the picture is at full strength, and the theme's own text
+can vanish into it -- most visibly in the light palette, where near-black text
+(`#0f1115`) lands on a dark frame. The skin row therefore has one more line:
+
+```
+字体颜色：  工作区 [swatch]   侧边栏 [swatch]   默认
+```
+
+- The two swatches are independent; each is stored on its own
+  (`skin-text-workspace` / `skin-text-sidebar`).
+- A swatch shows the area's **current** text colour until you pick one, so you
+  start from the truth rather than from a guess about the palette.
+- **默认** puts both areas back on the theme's own colours.
+- The workspace value covers the conversation column **and the right column** --
+  the right column is only over the picture in 整个窗口 scope, so it reverts
+  automatically in 仅对话区.
+- The sidebar value also repaints its **icons** and the `deepseek HARNESS` wordmark.
+- Both only apply while the skin is on, and switch off with it.
+
+What gets repainted is the theme's body-text family: `--dsw-alias-label-primary`,
+`-primary-dimmed`, `-primary-bluish`, `-secondary`, `-tertiary`, `-caption`.
+(The theme has no `--dsw-alias-text-*`; that name is a common misremembering.)
+`-primary-inverted` and `-primary-foreground` are deliberately left alone: they
+mean "text on a light chip" and "text on a coloured button", and overriding them
+would erase button labels.
+
+> One honest trade-off: a colour applies to a whole area, so it also reaches text
+> inside that area's own light cards (the composer is the obvious one). A mid tone
+> that reads on both the picture and a light card (a bright green, a sky blue, a
+> pale yellow) works better than pure white or pure black. Restricting it to text
+> directly over the picture would need the theme to distinguish the two cases,
+> which it does not.
+
 ```sh
 mkdir -p ~/.dsh/boot-animation/videos
 cp my-intro.mp4 ~/.dsh/boot-animation/videos/
