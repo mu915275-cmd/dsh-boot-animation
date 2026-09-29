@@ -352,10 +352,14 @@ html.dba-skin-on.dba-skin-window body[data-ds-dark-theme]{--dsw-specific-sidebar
 /* Text over the picture, one block per area.
    The theme names these --dsw-alias-label-* (there is no --dsw-alias-text-*; the
    picker's own CSS falls back to the label names for that reason), and body text
-   is spread over six of them, so a single override would leave half the words
-   unreadable. Only the CONTENT family is overridden: label-primary-inverted and
-   label-primary-foreground mean "text on a light chip" and "text on a coloured
-   button", and repainting those would erase button labels.
+   is spread over five of them, so a single override would leave words unreadable.
+   Only the CONTENT family is overridden. Three members are deliberately left
+   alone, and each one was found the hard way:
+     - label-primary-inverted / label-primary-foreground mean "text on a light
+       chip" and "text on a coloured button"; repainting them erases button labels;
+     - label-primary-bluish is the text of a BLUISH surface (the 预览版 pill), and
+       those info-tinted surfaces keep their colour, so repainting this one made the
+       badge white on pale blue.
    The two areas are found by the stable semantic suffix of their column class
    (the hash prefix changes between builds, the suffix does not).
    Both blocks are gated on the on-classes paintSkin toggles, because an unset
@@ -364,14 +368,12 @@ html.dba-skin-on.dba-text-ws-on [class*="_centerCol"],
 html.dba-skin-on.dba-text-ws-on.dba-skin-window [class*="_rightbarCol"]{
   --dsw-alias-label-primary:var(--dba-text-ws)!important;
   --dsw-alias-label-primary-dimmed:var(--dba-text-ws)!important;
-  --dsw-alias-label-primary-bluish:var(--dba-text-ws)!important;
   --dsw-alias-label-secondary:var(--dba-text-ws)!important;
   --dsw-alias-label-tertiary:var(--dba-text-ws)!important;
   --dsw-alias-label-caption:var(--dba-text-ws)!important}
 html.dba-skin-on.dba-text-side-on [class*="_sidebarCol"]{
   --dsw-alias-label-primary:var(--dba-text-side)!important;
   --dsw-alias-label-primary-dimmed:var(--dba-text-side)!important;
-  --dsw-alias-label-primary-bluish:var(--dba-text-side)!important;
   --dsw-alias-label-secondary:var(--dba-text-side)!important;
   --dsw-alias-label-tertiary:var(--dba-text-side)!important;
   --dsw-alias-label-caption:var(--dba-text-side)!important;
@@ -381,6 +383,45 @@ html.dba-skin-on.dba-text-side-on [class*="_sidebarCol"]{
   color:var(--dsw-alias-text-secondary,var(--dsw-alias-label-secondary,#777));cursor:pointer}
 .dba-color input[type=color]{width:26px;height:20px;padding:0;border:1px solid rgba(127,127,127,.45);
   border-radius:5px;background:transparent;cursor:pointer}
+/* THE SURFACES FOLLOW THE TEXT when the two disagree.
+   Cards, bubbles and the composer paint their own fill (--dsw-specific-input-major
+   is the composer card, --dsw-specific-bubble is a message bubble, and the
+   sidebar's new-session button is --dsw-alias-button-elevated-fill), and that fill
+   is paired with the PALETTE's text colour. White text in the light palette was
+   therefore white on a white card: the words the user reported as unreadable.
+   The scrim class is only set when the chosen colour's polarity is the opposite of
+   the palette's, so a colour that agrees with the theme changes nothing at all.
+   Only NEUTRAL surfaces are listed. Coloured fills (brand, info, contrast) keep
+   both their colour and their labels: those labels come from the
+   label-*-inverted / -foreground tokens this feature never repaints, so flipping a
+   coloured button's fill would erase its label. */
+html.dba-skin-on.dba-text-ws-scrim [class*="_centerCol"],
+html.dba-skin-on.dba-text-ws-scrim.dba-skin-window [class*="_rightbarCol"]{
+  --dsw-specific-input-major:var(--dba-ws-card)!important;
+  --dsw-specific-bubble:var(--dba-ws-card)!important;
+  --dsw-alias-settings-card-fill:var(--dba-ws-card)!important;
+  --dsw-alias-button-floating-fill:var(--dba-ws-card)!important;
+  --dsw-specific-menu:var(--dba-ws-card)!important;
+  --dsw-menu-surface-fill:var(--dba-ws-card)!important;
+  --dsw-specific-selector:var(--dba-ws-soft)!important;
+  --dsw-alias-button-elevated-fill:var(--dba-ws-soft)!important;
+  --dsw-alias-bg-layer-1:var(--dba-ws-soft)!important;
+  --dsw-alias-bg-layer-3:var(--dba-ws-soft)!important}
+html.dba-skin-on.dba-text-side-scrim [class*="_sidebarCol"]{
+  --dsw-specific-input-major:var(--dba-side-card)!important;
+  --dsw-specific-bubble:var(--dba-side-card)!important;
+  --dsw-alias-settings-card-fill:var(--dba-side-card)!important;
+  --dsw-alias-button-floating-fill:var(--dba-side-card)!important;
+  --dsw-specific-menu:var(--dba-side-card)!important;
+  --dsw-menu-surface-fill:var(--dba-side-card)!important;
+  --dsw-specific-selector:var(--dba-side-soft)!important;
+  --dsw-alias-button-elevated-fill:var(--dba-side-soft)!important;
+  --dsw-alias-bg-layer-1:var(--dba-side-soft)!important;
+  --dsw-alias-bg-layer-3:var(--dba-side-soft)!important}
+/* The sidebar column's own fill is a colour-mix of a neutral, so it needs the same
+   flip: a light palette with light text has to mix from the DARK neutral. */
+html.dba-skin-on.dba-skin-window.dba-text-side-scrim body{--dsw-specific-sidebar-fill:color-mix(in srgb,var(--dsw-static-neutral-bluish-900) var(--dba-skin-sidebar,65%),transparent)!important}
+html.dba-skin-on.dba-skin-window.dba-text-side-scrim body[data-ds-dark-theme]{--dsw-specific-sidebar-fill:color-mix(in srgb,var(--dsw-static-neutral-bluish-50) var(--dba-skin-sidebar,65%),transparent)!important}
 .dba-range{flex:1;min-width:130px;max-width:230px;height:18px;margin:0;
   accent-color:#07c160;cursor:pointer}
 .dba-range:disabled{opacity:.42;cursor:default}
@@ -1076,7 +1117,7 @@ function VideoLibrary({ onClose, onPreview }: { onClose: () => void; onPreview: 
       h(
         'div',
         { className: 'dba-fit' },
-        h('span', { title: '皮肤后面那层图上的文字颜色。透明度过低、或图本身偏暗时，主题自带的字会看不清。' }, '字体颜色：'),
+        h('span', { title: '皮肤后面那层图上的文字颜色。透明度过低、或图本身偏暗时，主题自带的字会看不清。选了浅色字，该区域的卡片底会自动变深（否则白底白字）；选了深色字则相反。' }, '字体颜色：'),
         h(
           'label',
           { className: 'dba-color', title: '工作区（对话区 + 右侧栏）的字色' },
@@ -1339,6 +1380,31 @@ function readTextColor(key: string): string {
   const raw = readFlag(key)
   return typeof raw === 'string' && /^#[0-9a-fA-F]{6}$/.test(raw.trim()) ? raw.trim().toLowerCase() : ''
 }
+
+/** WCAG relative luminance of `#rrggbb`, 0..1. */
+function lumaOf(hex: string): number {
+  const parts = /^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/.exec(hex.toLowerCase())
+  if (parts === null) return 0
+  const channel = (value: string): number => {
+    const s = parseInt(value, 16) / 255
+    return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4)
+  }
+  return 0.2126 * channel(parts[1]) + 0.7152 * channel(parts[2]) + 0.0722 * channel(parts[3])
+}
+
+/** Whether a colour counts as "light" for the purpose of pairing a surface with it. */
+function isLightColor(hex: string): boolean {
+  return lumaOf(hex) > 0.35
+}
+
+/**
+ * The neutral surfaces used inside an area when the chosen text colour fights the
+ * palette. Values mirror the dark palette's own layering for light text, and a
+ * light card for dark text, at an alpha high enough that the text stays readable
+ * over ANY picture underneath (the contract the verification measures).
+ */
+const SCRIM_FOR_LIGHT_TEXT = { card: 'rgba(30,31,34,0.88)', soft: 'rgba(56,58,62,0.86)' }
+const SCRIM_FOR_DARK_TEXT = { card: 'rgba(255,255,255,0.90)', soft: 'rgba(238,240,244,0.88)' }
 
 type StoredFrame = { id?: unknown; version?: unknown; name?: unknown; back?: unknown; dataUrl?: unknown }
 type StoredFrameRead = { image: string; key: string; source: string; back: number; url: string }
@@ -1694,13 +1760,33 @@ function paintSkin(): void {
   // Text colours. The gate class and the variable are set together: the CSS block
   // only exists while the class is on, so an unset colour leaves the theme's own
   // tokens completely alone instead of feeding them an undefined var().
-  const textColour = (cls: string, prop: string, value: string): void => {
-    root.classList.toggle(cls, active && value !== '')
-    if (value === '') root.style.removeProperty(prop)
-    else root.style.setProperty(prop, value)
+  const paletteDark = document.body.hasAttribute('data-ds-dark-theme')
+  const textColour = (area: string, scrimBase: string, value: string): void => {
+    root.classList.toggle('dba-text-' + area + '-on', active && value !== '')
+    if (value === '') {
+      root.style.removeProperty('--dba-text-' + area)
+      root.style.removeProperty('--dba-' + scrimBase + '-card')
+      root.style.removeProperty('--dba-' + scrimBase + '-soft')
+      root.classList.remove('dba-text-' + area + '-scrim')
+      return
+    }
+    root.style.setProperty('--dba-text-' + area, value)
+    // The palette already pairs light text with dark surfaces (and the reverse), so
+    // a colour that agrees with it needs no surface work at all -- only a colour
+    // that fights the palette does, and then the neutral surfaces follow it.
+    const scrim = active && isLightColor(value) !== paletteDark
+    root.classList.toggle('dba-text-' + area + '-scrim', scrim)
+    if (!scrim) {
+      root.style.removeProperty('--dba-' + scrimBase + '-card')
+      root.style.removeProperty('--dba-' + scrimBase + '-soft')
+      return
+    }
+    const colours = isLightColor(value) ? SCRIM_FOR_LIGHT_TEXT : SCRIM_FOR_DARK_TEXT
+    root.style.setProperty('--dba-' + scrimBase + '-card', colours.card)
+    root.style.setProperty('--dba-' + scrimBase + '-soft', colours.soft)
   }
-  textColour('dba-text-ws-on', '--dba-text-ws', skinState.textWorkspace)
-  textColour('dba-text-side-on', '--dba-text-side', skinState.textSidebar)
+  textColour('ws', 'ws', skinState.textWorkspace)
+  textColour('side', 'side', skinState.textSidebar)
   // Unitless 0..1: read by the frame's opacity. The sidebar reads its own
   // variable below, so the two sliders stay independent.
   root.style.setProperty('--dba-skin-strength', String((100 - skinState.strength) / 100))

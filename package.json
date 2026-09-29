@@ -1,6 +1,6 @@
 {
   "name": "dsh-boot-animation",
-  "version": "1.2.0",
+  "version": "1.2.2",
   "description": "打开新对话（或你钉住的会话）时，铺满窗口播放一段片头动画；入场动画与工作区壁纸各自独立选段，工作区与侧边栏还能各自设定压在皮肤上的字体颜色。Open a new (or a pinned) DSH conversation and a full-frame intro plays; the intro and the workspace wallpaper are picked independently, and the sidebar and the workspace each get their own text colour over the picture.",
   "type": "module",
   "main": "./lib/index.js",

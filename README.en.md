@@ -128,18 +128,37 @@ can vanish into it -- most visibly in the light palette, where near-black text
 - Both only apply while the skin is on, and switch off with it.
 
 What gets repainted is the theme's body-text family: `--dsw-alias-label-primary`,
-`-primary-dimmed`, `-primary-bluish`, `-secondary`, `-tertiary`, `-caption`.
+`-primary-dimmed`, `-secondary`, `-tertiary`, `-caption`.
 (The theme has no `--dsw-alias-text-*`; that name is a common misremembering.)
-`-primary-inverted` and `-primary-foreground` are deliberately left alone: they
-mean "text on a light chip" and "text on a coloured button", and overriding them
-would erase button labels.
+Three things are deliberately left alone, because each is a semantic PAIR with a
+surface this feature does not flip:
 
-> One honest trade-off: a colour applies to a whole area, so it also reaches text
-> inside that area's own light cards (the composer is the obvious one). A mid tone
-> that reads on both the picture and a light card (a bright green, a sky blue, a
-> pale yellow) works better than pure white or pure black. Restricting it to text
-> directly over the picture would need the theme to distinguish the two cases,
-> which it does not.
+| Left alone | Why |
+|---|---|
+| `-primary-inverted`, `-primary-foreground` | "text on a light chip" / "text on a coloured button" — repainting them erases button labels |
+| `-primary-bluish` | the text of a BLUISH pill (the 预览版 badge next to the title); its pale blue fill is an info colour and does not follow |
+| coloured fills themselves (brand / info buttons, e.g. send) | their labels are the two tokens above |
+
+### The surfaces follow the text when the two disagree
+
+Cards carry their own fill, and that fill is paired with the PALETTE's text colour,
+so white text in the light palette was white on a white card. When your colour is the
+opposite polarity of the palette, the area's **neutral surfaces flip with it**:
+light text makes the composer, message bubbles (where the file names are), the input
+card, the chips and the sidebar's new-session button dark; dark text makes them
+light. When your colour AGREES with the palette nothing moves at all, so a choice
+that matches the theme changes nothing.
+
+Flipped: `--dsw-specific-input-major`, `--dsw-specific-bubble`,
+`--dsw-specific-selector`, `--dsw-alias-button-elevated-fill`,
+`--dsw-alias-settings-card-fill`, `--dsw-alias-button-floating-fill`,
+`--dsw-specific-menu` / `--dsw-menu-surface-fill`, `--dsw-alias-bg-layer-1/3`, plus
+the sidebar column's own fill in window scope.
+
+The one thing still yours to weigh is text **straight onto the picture** (the
+conversation title is the obvious one): there is no card under it, only your clip,
+so its readability depends on that clip -- a dark picture wants light text and the
+reverse -- or dilute the picture with the transparency slider.
 
 ```sh
 mkdir -p ~/.dsh/boot-animation/videos
