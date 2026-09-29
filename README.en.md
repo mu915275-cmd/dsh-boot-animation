@@ -65,8 +65,17 @@ switching away and back, or reloading. Click again to unpin.
 
 ## Built-in clips and your own video
 
-The plugin is a **library**, not a single slot: it lists every clip it can find,
-you pick one, and the choice is remembered.
+The plugin is a **library**, not a single slot: it lists every clip it can find and
+you pick what each of two things uses. The picker has **two sections**, each with
+its own tick, and neither affects the other:
+
+| Section | What it decides |
+|---|---|
+| **intro** (入场动画) | which clip plays full-frame on a new conversation, or on a pinned one |
+| **wallpaper** (工作区壁纸) | which clip is drawn behind the workspace canvas as the skin |
+
+The wallpaper **follows the intro** until you pick one on its own; after that the
+two are independent, so changing the animation stops dragging the wallpaper with it.
 
 **Four clips ship with it**, embedded in the code (`lib/clips.data.js`, base64 —
 there are no mp4 files on disk for them):
@@ -87,11 +96,15 @@ file needs no restart:
 
 | Order | Location |
 |---|---|
-| 1 | the clip picked in the 🎛 library panel (`~/.dsh/boot-animation/selection.json`) |
+| 1 | the clip picked in the 🎛 library panel, **per role** (`~/.dsh/boot-animation/selection.json`: `intro` / `wallpaper`) |
 | 2 | the file named by `DSH_BOOT_ANIMATION` |
 | 3 | `~/.dsh/boot-animation/intro.mp4` |
 | 4 | the newest file in `~/.dsh/boot-animation/videos/` |
 | 5 | the four embedded clips above |
+
+Steps 2-5 are what a role you never picked falls back to, so a profile that never
+opens the picker behaves exactly as it did before the two sections existed -- and a
+historical `{"id": "..."}` selection file still drives both roles at once.
 
 ```sh
 mkdir -p ~/.dsh/boot-animation/videos

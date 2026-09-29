@@ -241,14 +241,14 @@ const CSS = `
 .dba-pin.dba-pin-on{color:#07c160;background:rgba(7,193,96,.14)}
 .dba-veil{position:fixed;inset:0;z-index:2147483200;background:rgba(0,0,0,.46);
   display:flex;align-items:center;justify-content:center;padding:24px}
-.dba-lib{width:min(560px,100%);max-height:min(76vh,640px);overflow:auto;
+.dba-lib{width:min(560px,100%);max-height:min(90vh,900px);overflow:auto;
   background:var(--dsw-alias-bg-elevated,var(--dsw-alias-bg-layer-2,#fff));color:var(--dsw-alias-text-primary,var(--dsw-alias-label-primary,#191919));
   border:1px solid rgba(127,127,127,.28);border-radius:14px;padding:18px 18px 14px;
   box-shadow:0 18px 60px rgba(0,0,0,.34);font-family:inherit;
   font-size:13px;line-height:1.55}
 .dba-lib h3{margin:0 0 4px;font-size:15px;font-weight:600}
-.dba-lib p{margin:0 0 12px;color:var(--dsw-alias-text-secondary,var(--dsw-alias-label-secondary,#777));font-size:12.5px}
-.dba-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;
+.dba-lib p{margin:0 0 6px;color:var(--dsw-alias-text-secondary,var(--dsw-alias-label-secondary,#777));font-size:12.5px}
+.dba-item{display:flex;align-items:center;gap:10px;padding:4px 10px;border-radius:9px;
   cursor:pointer;border:1px solid transparent}
 .dba-item:hover{background:rgba(127,127,127,.12)}
 .dba-item.dba-cur{border-color:rgba(7,193,96,.55);background:rgba(7,193,96,.10)}
@@ -259,12 +259,12 @@ const CSS = `
 .dba-badge.dba-b-warn{background:rgba(210,120,40,.18);color:#b46214;cursor:help}
 .dba-meta{font-size:11.5px;color:var(--dsw-alias-text-secondary,var(--dsw-alias-label-secondary,#999));white-space:nowrap}
 .dba-mark{width:16px;text-align:center;color:#07c160;font-weight:700}
-.dba-dir{margin:12px 0 0;padding:9px 10px;border-radius:9px;background:rgba(127,127,127,.10);
+.dba-dir{margin:9px 0 0;padding:7px 10px;border-radius:9px;background:rgba(127,127,127,.10);
   font-size:11.5px;color:var(--dsw-alias-text-secondary,var(--dsw-alias-label-secondary,#777));word-break:break-all}
 .dba-dir code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11.5px;
   color:var(--dsw-alias-text-primary,var(--dsw-alias-label-primary,#333))}
-.dba-bar{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
-.dba-fit{display:flex;align-items:center;gap:8px;margin-top:12px;
+.dba-bar{display:flex;gap:8px;justify-content:flex-end;margin-top:10px}
+.dba-fit{display:flex;align-items:center;gap:8px;margin-top:8px;
   font-size:12px;color:var(--dsw-alias-text-secondary,var(--dsw-alias-label-secondary,#777))}
 .dba-btn.dba-btn-on{border-color:rgba(7,193,96,.6);background:rgba(7,193,96,.12);color:#07974b}
 .dba-btn.dba-btn-preview{border-color:rgba(7,193,96,.55);color:#07974b;font-weight:600}
@@ -277,6 +277,15 @@ const CSS = `
 .dba-msg.dba-err{color:#d24a43}
 .dba-btn:disabled{opacity:.42;cursor:default}
 .dba-btn:disabled:hover{background:transparent}
+/* Two role sections in one list. The rows are the same rows as before; only the
+   heading tells them apart, and the heading is where the "which one am I
+   picking" question gets answered. */
+.dba-sec-head{display:flex;align-items:baseline;gap:8px;margin:7px 0 2px;
+  padding-bottom:4px;border-bottom:.5px solid var(--dsw-alias-border-l4,rgba(127,127,127,.28))}
+.dba-sec-name{font-size:13px;font-weight:600;
+  color:var(--dsw-alias-text-primary,var(--dsw-alias-label-primary,#191919))}
+.dba-sec-hint{font-size:11.5px;
+  color:var(--dsw-alias-text-secondary,var(--dsw-alias-label-secondary,#777))}
 /* The workspace skin: the selected clip's last usable frame as a still
    backdrop behind the whole shell.
 
@@ -644,17 +653,29 @@ type VideoInfo = {
   faststart?: boolean
   copies?: number
   alsoAt?: string[]
+  /** Picked as the intro. */
   active?: boolean
+  /** Picked as the workspace wallpaper. */
+  wallpaper?: boolean
 }
 
 type VideoList = {
+  /** The INTRO pick: the historical single-slot meaning of this field. */
   activeId: string | null
   activeHow?: string
-  /** The active clip's content key; the skin's cache key and the media URL's `?v=`. */
+  /** The intro clip's content key, for the media URL's `?v=`. */
   activeVersion?: string | null
+  /** The WALLPAPER pick; it follows the intro until it is set on its own. */
+  wallpaperId?: string | null
+  wallpaperHow?: string
+  wallpaperVersion?: string | null
   videos: VideoInfo[]
   userDir: string
 }
+
+/** The two things a clip can be picked for. */
+type Role = 'intro' | 'wallpaper'
+const ROLE_LABEL: Record<Role, string> = { intro: '入场动画', wallpaper: '工作区壁纸' }
 
 function formatBytes(n: number): string {
   if (!Number.isFinite(n) || n <= 0) return '0 B'
@@ -697,6 +718,13 @@ function VideoLibrary({ onClose, onPreview }: { onClose: () => void; onPreview: 
       const data = (await response.json()) as VideoList
       setState(data)
       setMsg({ text: '', kind: '' })
+      // Keep the overlay's cached content key in step with the INTRO pick: a
+      // `?v=` that no longer matches costs a revalidation on the next play (the
+      // host answers `no-cache` for a stale key), and picking a clip is exactly
+      // when that becomes stale.
+      if (typeof data.activeVersion === 'string' && data.activeVersion !== '') {
+        activeVersion = data.activeVersion
+      }
     } catch (error: unknown) {
       setMsg({ text: '读取片库失败：' + String(error), kind: 'dba-err' })
     }
@@ -716,21 +744,30 @@ function VideoLibrary({ onClose, onPreview }: { onClose: () => void; onPreview: 
   }, [onClose])
 
   const choose = useCallback(
-    async (id: string) => {
+    async (role: Role, id: string) => {
       setBusy(true)
       try {
         const response = await fetch(SELECT_URL, {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ id }),
+          body: JSON.stringify({ id, role }),
         })
         const data = (await response.json()) as { ok?: boolean; error?: string; name?: string }
         if (data.ok === true) {
-          setMsg({ text: '已切换：' + String(data.name ?? id) + '（下次播片头生效）', kind: 'dba-ok' })
+          setMsg({
+            text:
+              '「' +
+              ROLE_LABEL[role] +
+              '」已设为：' +
+              String(data.name ?? id) +
+              (role === 'intro' ? '（下次播放片头生效）' : '（壁纸立刻更新）'),
+            kind: 'dba-ok',
+          })
           await load()
-          // The skin follows the selection: the host resolves a different file
-          // for the same route now, so the stored frame is a different clip's.
-          if (skinState.on) void syncSkin(false)
+          // Only the WALLPAPER changes what the skin draws. Selecting an intro
+          // must not touch the skin at all -- that separation is the point of
+          // having two lists.
+          if (role === 'wallpaper' && skinState.on) void syncSkin(false)
         } else {
           setMsg({ text: '切换失败：' + String(data.error ?? '未知错误'), kind: 'dba-err' })
         }
@@ -744,41 +781,34 @@ function VideoLibrary({ onClose, onPreview }: { onClose: () => void; onPreview: 
   )
 
   const videos = state === null ? [] : state.videos
-  const activeId = state === null ? null : state.activeId
 
-  return h(
-    'div',
-    {
-      className: 'dba-veil',
-      onClick: (event: { target: unknown; currentTarget: unknown; stopPropagation: () => void }) => {
-        if (event.target === event.currentTarget) onClose()
-      },
-    },
+  /**
+   * One role's list. The rows are identical to the old single list -- same
+   * badges, same size, same de-dup annotations -- only the tick and the click
+   * target belong to one role now.
+   */
+  const renderRole = (role: Role, hint: string): unknown[] => [
     h(
       'div',
-      { className: 'dba-lib', onClick: (event: { stopPropagation: () => void }) => event.stopPropagation() },
-      h('h3', null, '片头片库'),
-      h(
-        'p',
-        null,
-        '选中的那段会在下次播放片头时登场 —— 新对话、以及你钉住的会话。',
-        h('br', null),
-        '「工作区皮肤」用选中那段的尾帧当背景，换一段就跟着换。',
-      ),
-      ...(videos.length === 0
-        ? [h('div', { className: 'dba-item' }, h('span', { className: 'dba-nm' }, '（还没找到任何视频）'))]
-        : videos.map((v) =>
-            h(
+      { className: 'dba-sec-head' },
+      h('span', { className: 'dba-sec-name' }, ROLE_LABEL[role]),
+      h('span', { className: 'dba-sec-hint' }, hint),
+    ),
+    ...(videos.length === 0
+      ? [h('div', { className: 'dba-item' }, h('span', { className: 'dba-nm' }, '（还没找到任何视频）'))]
+      : videos.map((v) => {
+          const isPicked = role === 'intro' ? v.active === true : v.wallpaper === true
+          return h(
               'div',
               {
                 key: v.id,
-                className: 'dba-item' + (v.id === activeId ? ' dba-cur' : ''),
+                className: 'dba-item' + (isPicked ? ' dba-cur' : ''),
                 title: v.file,
                 onClick: () => {
-                  if (!busy && v.id !== activeId) void choose(v.id)
+                  if (!busy && !isPicked) void choose(role, v.id)
                 },
               },
-              h('span', { className: 'dba-mark' }, v.id === activeId ? '✓' : ''),
+              h('span', { className: 'dba-mark' }, isPicked ? '✓' : ''),
               h('span', { className: 'dba-nm' }, v.name),
               v.legacy ? h('span', { className: 'dba-badge' }, '原片源') : null,
               (v.copies ?? 1) > 1
@@ -808,8 +838,25 @@ function VideoLibrary({ onClose, onPreview }: { onClose: () => void; onPreview: 
                 : null,
               h('span', { className: 'dba-badge' }, SOURCE_LABEL[v.source] ?? v.source),
               h('span', { className: 'dba-meta' }, formatBytes(v.bytes)),
-            ),
-          )),
+            )
+        })),
+  ]
+
+  return h(
+    'div',
+    {
+      className: 'dba-veil',
+      onClick: (event: { target: unknown; currentTarget: unknown; stopPropagation: () => void }) => {
+        if (event.target === event.currentTarget) onClose()
+      },
+    },
+    h(
+      'div',
+      { className: 'dba-lib', onClick: (event: { stopPropagation: () => void }) => event.stopPropagation() },
+      h('h3', null, '片头片库'),
+      h('p', null, '两件东西各自选一段 —— 它们互不影响。'),
+      ...renderRole('intro', '开新对话、以及打开你钉住的会话时播放'),
+      ...renderRole('wallpaper', '铺在工作区画布后面的皮肤：静帧取尾帧，动态循环片尾'),
       h(
         'div',
         { className: 'dba-dir' },
@@ -1007,10 +1054,10 @@ function VideoLibrary({ onClose, onPreview }: { onClose: () => void; onPreview: 
           {
             type: 'button',
             className: 'dba-btn dba-btn-preview',
-            title: '立刻播放当前选中的这段，不用等下一次开新对话或钉住的会话',
+            title: '立刻播放当前选中的入场动画，不用等下一次开新对话或钉住的会话',
             onClick: onPreview,
           },
-          '▶ 预览当前',
+          '▶ 预览入场动画',
         ),
         h(
           'button',
@@ -1727,10 +1774,14 @@ function frameDetail(name: string, back: number): string {
 }
 
 /**
- * Reconcile the painted skin with the host's current selection.
+ * Reconcile the painted skin with the host's WALLPAPER selection.
  *
- * `force` re-reads the media even when the stored frame already matches, which
- * is what a clip switch needs after its content key changes.
+ * It is deliberately not `activeId`: that field means the intro, and the whole
+ * point of the two lists is that picking an intro leaves the wallpaper alone.
+ * `?? activeId` only covers a host that predates the split.
+ *
+ * `force` re-reads the media even when the stored frame already matches, which is
+ * what a wallpaper switch needs after its content key changes.
  */
 async function syncSkin(force: boolean): Promise<void> {
   if (!skinState.on) {
@@ -1745,14 +1796,17 @@ async function syncSkin(force: boolean): Promise<void> {
     setSkinState({ status: 'error', detail: '皮肤：读片库失败（' + String(error) + '）' })
     return
   }
-  const id = typeof list.activeId === 'string' && list.activeId !== '' ? list.activeId : null
+  const raw = list.wallpaperId ?? list.activeId
+  const rawVersion = list.wallpaperVersion ?? list.activeVersion ?? null
+  const version = typeof rawVersion === 'string' && rawVersion !== '' ? rawVersion : null
+  const id = typeof raw === 'string' && raw !== '' ? raw : null
   if (id === null) {
-    setSkinState({ status: 'error', detail: '皮肤：当前没有选中的片子' })
+    setSkinState({ status: 'error', detail: '皮肤：当前没有选中的壁纸' })
     return
   }
   const active = list.videos.find((video) => video.id === id)
   const name = active?.name ?? id
-  const key = skinKeyOf(id, list.activeVersion ?? null)
+  const key = skinKeyOf(id, version)
   if (!force && key === skinState.key && skinImage !== '') {
     setSkinState({ status: 'ready', detail: frameDetail(skinState.source === '' ? name : skinState.source, skinBack) })
     paintSkin()
@@ -1760,7 +1814,6 @@ async function syncSkin(force: boolean): Promise<void> {
   }
   setSkinState({ status: 'working', detail: '皮肤：正在从「' + name + '」的尾帧生成…', source: name })
   try {
-    const version = typeof list.activeVersion === 'string' && list.activeVersion !== '' ? list.activeVersion : null
     const url = MEDIA_URL + encodeURIComponent(id) + (version === null ? '' : '?v=' + encodeURIComponent(version))
     const shot = await captureTailFrame(url)
     skinImage = shot.dataUrl

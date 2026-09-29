@@ -1,7 +1,7 @@
 {
   "name": "dsh-boot-animation",
-  "version": "1.0.0",
-  "description": "打开新对话（或你钉住的会话）时，铺满窗口播放一段片头开机动画；选中那段的画面还能当工作区皮肤（静帧，或只循环片尾 N 秒的动态）。Open a new (or a pinned) DSH conversation and a full-frame intro animation plays; the selected clip can also skin the workspace as a still or as a looping tail.",
+  "version": "1.1.1",
+  "description": "打开新对话（或你钉住的会话）时，铺满窗口播放一段片头动画；入场动画与工作区壁纸各自独立选段（壁纸为静帧，或只循环片尾 N 秒的动态）。Open a new (or a pinned) DSH conversation and a full-frame intro plays; the intro and the workspace wallpaper are picked independently, as a still or as a looping tail.",
   "type": "module",
   "main": "./lib/index.js",
   "types": "./lib/types/index.d.ts",
